@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: 'Roboto Condensed', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+body {
+  background-color: #FDFBF4;
+}
+
+.roboto-regular {
+  font-family: 'Roboto', sans-serif;
+}
+
+.chivo-mono {
+  font-family: 'Chivo Mono', monospace;
+}
+
+.chivo-mono-bold {
+  font-family: 'Chivo Mono', monospace;
+  font-weight: 700;
+}
+
+@keyframes slowBounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 10px);
+  }
+}
+
+.animate-slow-bounce {
+  animation: slowBounce 2s ease-in-out infinite;
+}
+
+.nav-link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #FDFBF4;
+  transition: width 0.2s ease;
+}
+
+.nav-link-underline:hover::after {
+  width: 100%;
+}
+
+.nav-link-underline-dark {
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-link-underline-dark::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #002A34;
+  transition: width 0.2s ease;
+}
+
+.nav-link-underline-dark:hover::after {
+  width: 100%;
+}
+
+.pricing-link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.pricing-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #002A34;
+  transition: width 0.2s ease;
+}
+
+.pricing-link-underline:hover::after {
+  width: 100%;
+}
+
