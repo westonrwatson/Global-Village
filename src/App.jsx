@@ -29,7 +29,6 @@ function App() {
   const [touchEnd, setTouchEnd] = useState(null)
   const spencerEyesRef = useRef(null)
   const sydHostelRef = useRef(null)
-  const faqRefs = useRef({})
   const carouselRef = useRef(null)
 
   // Swipe handlers for carousel
@@ -58,60 +57,6 @@ function App() {
     }
   }
 
-  const smoothScrollTo = (element, offset = 0) => {
-    if (!element) return
-    
-    // Wait for expansion animation to fully complete and layout to stabilize
-    setTimeout(() => {
-      const elementRect = element.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
-      const elementTop = elementRect.top
-      const elementBottom = elementRect.bottom
-      
-      // Only scroll if element is not already visible or is cut off at bottom
-      // Don't scroll if element is fully visible
-      if (elementTop >= 0 && elementBottom <= viewportHeight) {
-        return // Element is already fully visible
-      }
-      
-      // Only scroll if element is below viewport or cut off at bottom
-      if (elementTop < 0 || elementBottom > viewportHeight) {
-        const targetPosition = elementRect.top + window.pageYOffset - offset
-        const startPosition = window.pageYOffset
-        const distance = targetPosition - startPosition
-        
-        // Only scroll if there's meaningful distance
-        if (Math.abs(distance) < 10) return
-        
-        const duration = 1200
-        let start = null
-
-        const easeInOutQuad = (t) => {
-          return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
-        }
-
-        const animation = (currentTime) => {
-          if (start === null) start = currentTime
-          const timeElapsed = currentTime - start
-          const progress = Math.min(timeElapsed / duration, 1)
-          const ease = easeInOutQuad(progress)
-          
-          const currentScroll = startPosition + distance * ease
-          window.scrollTo({
-            top: currentScroll,
-            behavior: 'auto'
-          })
-          
-          if (timeElapsed < duration) {
-            requestAnimationFrame(animation)
-          }
-        }
-
-        requestAnimationFrame(animation)
-      }
-    }, 400)
-  }
-
   useEffect(() => {
     const matchHeights = () => {
       if (spencerEyesRef.current && sydHostelRef.current) {
@@ -138,21 +83,70 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMenuOpen])
+
   return (
     <>
       {/* Hero Section */}
       <div className="relative min-h-screen w-full">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
           style={{ backgroundImage: `url(${jengNoodleImage})` }}
         />
         
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
         
+        {/* Mobile Menu - Full Screen */}
+        {isMenuOpen && (
+          <div className="fixed inset-0 bg-[#FDFBF4] md:hidden z-40 flex flex-col">
+            <div className="flex-1 flex flex-col items-center justify-center gap-10 px-6">
+              <a 
+                href="#about" 
+                className="text-[#002A34] font-black text-4xl uppercase tracking-wide hover:text-[#CEF550] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </a>
+              <a 
+                href="#destinations" 
+                className="text-[#002A34] font-black text-4xl uppercase tracking-wide hover:text-[#CEF550] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Destinations
+              </a>
+              <a 
+                href="#pricing" 
+                className="text-[#002A34] font-black text-4xl uppercase tracking-wide hover:text-[#CEF550] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Pricing
+              </a>
+              <a 
+                href="#join" 
+                className="text-[#002A34] font-black text-4xl uppercase tracking-wide hover:text-[#CEF550] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Join
+              </a>
+              <button 
+                className="mt-4 px-10 py-3 border-2 border-[#002A34] text-[#002A34] font-black text-xl uppercase tracking-wide rounded-full hover:bg-[#CEF550] hover:border-[#CEF550] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Pass
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Navbar */}
-        <nav className={`absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 md:px-8 py-6 ${isMenuOpen ? 'bg-[#FDFBF4]' : ''}`}>
+        <nav className={`top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-8 py-6 ${isMenuOpen ? 'fixed' : 'absolute'}`}>
           {/* Left side - Logo */}
           <a href="/" className={`uppercase font-black text-xl md:text-2xl tracking-wide ${isMenuOpen ? 'text-[#002A34]' : 'text-[#FDFBF4] hover:text-[#CEF550]'}`}>
             GLOBAL VILLAGE
@@ -163,9 +157,10 @@ function App() {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={`md:hidden focus:outline-none ${isMenuOpen ? 'text-[#002A34]' : 'text-[#FDFBF4]'}`}
             aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
           >
             <svg
-              className="w-6 h-6"
+              className="w-7 h-7"
               fill="none"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -199,48 +194,6 @@ function App() {
               My Pass
             </button>
           </div>
-          
-          {/* Mobile Menu - Dropdown */}
-          {isMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-[#FDFBF4] md:hidden z-30">
-              <div className="flex flex-col items-start px-4 pb-6 gap-4">
-                <a 
-                  href="#about" 
-                  className="nav-link-underline-dark text-[#002A34] font-regular text-base"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  About
-                </a>
-                <a 
-                  href="#destinations" 
-                  className="nav-link-underline-dark text-[#002A34] font-regular text-base"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Destinations
-                </a>
-                <a 
-                  href="#pricing" 
-                  className="nav-link-underline-dark text-[#002A34] font-regular text-base"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Pricing
-                </a>
-                <a 
-                  href="#join" 
-                  className="nav-link-underline-dark text-[#002A34] font-regular text-base"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Join
-                </a>
-                <button 
-                  className="px-6 py-1 border border-[#002A34] text-[#002A34] font-regular text-base rounded-full hover:bg-[#CEF550] hover:border-[#CEF550] hover:text-[#002A34] transition-colors w-fit"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  My Pass
-                </button>
-              </div>
-            </div>
-          )}
         </nav>
         
         {/* Hero Content - Centered */}
@@ -256,7 +209,7 @@ function App() {
           </h1>
           
           {/* Bottom button */}
-          <button className="px-8 py-2 bg-[#FDFBF4] text-[#002A34] font-regular md:text-md lg:thttps://lapoint.b-cdn.net/image/6YAZJRkMBh1PcwhIgYZjdj/6cdace09a87a91acbe0deebdc36c19dd/Bali-Lapoint-in-the-heart-of-Canggu.jpg?fm=jpg&fl=progressive&w=1920&q=75ext-md text-base rounded-full hover:bg-[#CEF550] hover:text-[#002A34] transition-colors shadow-lg">
+          <button className="px-8 py-2 bg-[#FDFBF4] text-[#002A34] font-regular text-base md:text-lg rounded-full hover:bg-[#CEF550] hover:text-[#002A34] transition-colors shadow-lg">
             Get Your Pass Today
           </button>
         </div>
@@ -715,9 +668,9 @@ function App() {
                   style={{ transform: `translateX(-${currentStep * 100}%)` }}
                 >
                   {[0, 1, 2, 3].map((step) => (
-                    <div key={step} className="w-full flex-shrink-0 flex flex-col md:flex-row h-[700px] md:h-[700px]">
+                    <div key={step} className="w-full flex-shrink-0 flex flex-col md:flex-row min-h-[720px] md:min-h-0 md:h-[700px]">
                       {/* Left Side - Image/Graphic Placeholder */}
-                      <div className="w-full md:w-1/2 bg-[#002A34] flex items-center justify-center h-[250px] md:h-full p-0 overflow-hidden flex-shrink-0">
+                      <div className="w-full md:w-1/2 bg-[#002A34] flex items-center justify-center h-[220px] md:h-full p-0 overflow-hidden flex-shrink-0">
                         <img 
                           src={
                             step === 0 ? juddgabeImage :
@@ -732,8 +685,8 @@ function App() {
                       </div>
 
                       {/* Right Side - Content Panel */}
-                      <div className="w-full md:w-1/2 bg-[#EFECE1] px-6 pt-6 md:p-12 lg:p-16 flex flex-col flex-1">
-                        <div className="flex-1">
+                      <div className="w-full md:w-1/2 bg-[#EFECE1] px-6 py-8 md:p-12 lg:p-16 flex flex-col flex-1">
+                        <div>
                           <p className="text-[#002A34] text-sm md:text-base mb-2">
                             Step {step + 1}
                           </p>
@@ -780,7 +733,7 @@ function App() {
                             )}
                           </ul>
                         </div>
-                        <div className="pt-6 pb-6 md:pb-0">
+                        <div className="mt-auto pt-8">
                           <button className={`w-full md:w-auto px-8 py-3 text-[#002A34] font-medium text-base rounded-full hover:brightness-90 transition-all ${
                             step === 0 ? 'bg-[#CEF550]' :
                             step === 1 ? 'bg-[#FDA700]' :
@@ -858,20 +811,17 @@ function App() {
               ].map((faq, index) => {
                 const isExpanded = expandedFaq.has(index);
                 return (
-                  <div key={index} className="pb-2" ref={el => faqRefs.current[index] = el}>
-                    <div className={`rounded-lg px-4 transition-all group ${isExpanded ? 'bg-[#A1C55C] py-5' : 'hover:bg-[#A1C55C] py-2'}`}>
+                  <div key={index} className="pb-2">
+                    <div className={`rounded-lg px-4 py-4 transition-colors group ${isExpanded ? 'bg-[#A1C55C]' : 'hover:bg-[#A1C55C]'}`}>
                       <button
                         onClick={() => {
                           const newExpanded = new Set(expandedFaq);
                           if (isExpanded) {
                             newExpanded.delete(index);
-                            setExpandedFaq(newExpanded);
                           } else {
                             newExpanded.add(index);
-                            setExpandedFaq(newExpanded);
-                            // Scroll to the question after expansion starts
-                            smoothScrollTo(faqRefs.current[index], 20);
                           }
+                          setExpandedFaq(newExpanded);
                         }}
                         className="w-full flex items-center justify-between text-left"
                       >
@@ -931,20 +881,17 @@ function App() {
                 const faqIndex = index + 5; // Continue numbering from column 1
                 const isExpanded = expandedFaq.has(faqIndex);
                 return (
-                  <div key={faqIndex} className="pb-2" ref={el => faqRefs.current[faqIndex] = el}>
-                    <div className={`rounded-lg px-4 transition-all group ${isExpanded ? 'bg-[#A1C55C] py-5' : 'hover:bg-[#A1C55C] py-2'}`}>
+                  <div key={faqIndex} className="pb-2">
+                    <div className={`rounded-lg px-4 py-4 transition-colors group ${isExpanded ? 'bg-[#A1C55C]' : 'hover:bg-[#A1C55C]'}`}>
                       <button
                         onClick={() => {
                           const newExpanded = new Set(expandedFaq);
                           if (isExpanded) {
                             newExpanded.delete(faqIndex);
-                            setExpandedFaq(newExpanded);
                           } else {
                             newExpanded.add(faqIndex);
-                            setExpandedFaq(newExpanded);
-                            // Scroll to the question after expansion starts
-                            smoothScrollTo(faqRefs.current[faqIndex], 20);
                           }
+                          setExpandedFaq(newExpanded);
                         }}
                         className="w-full flex items-center justify-between text-left"
                       >
